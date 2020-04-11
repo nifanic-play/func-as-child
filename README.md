@@ -1,5 +1,7 @@
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
+Source: https://medium.com/merrickchristensen/function-as-child-components-5f3920a9ace9
+
 ## Available Scripts
 
 In the project directory, you can run:
