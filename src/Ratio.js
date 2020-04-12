@@ -1,30 +1,39 @@
 import React from "react";
 
 /**
- * @typedef {Object} RatioProps
- * @property {number} x
- * @property {number} y
+ * @callback FunctionAsChild
+ * @param {RatioState}
  */
 /**
- * @typedef {Object} RatioState
+ * @typedef {Object} RatioProps
+ * @property {number} [x]
+ * @property {number} [y]
+ */
+/**
+ * @typedef {RatioShape} RatioState
  * @property {boolean} [hasComputed=false]
  */
 /**
  * @typedef {Object} RatioShape
- * @property {number} [heigth=0]
- * @property {number} [width=0]
+ * @property {number} height
+ * @property {number} width
  */
 
 export class Ratio extends React.Component {
-  /** @type {RatioShape & RatioState} */
-  state = {
-    hasComputed: false,
-    width: 0,
-    height: 0
-  };
+  /** @param {Readonly<RatioProps>} props */
+  constructor(props) {
+    super(props);
+
+    /** @type {RatioState} */
+    this.state = {
+      hasComputed: false,
+      width: 0,
+      height: 0
+    };
+  }
 
   /**
-   * @param {RatioProps | React.ReactNode} props
+   * @param {Readonly<RatioProps>} props
    * @return {RatioShape}
    */
   getComputedDimensions = props => {
@@ -33,16 +42,37 @@ export class Ratio extends React.Component {
 
     return {
       width,
-      heigth: width * (y / x)
+      height: width * (y / x)
     };
   };
 
   /**
-   * @param {RatioProps} nextProps
-   * @param nextContext
+   * @param {Omit<"children", RatioProps>} nextProps
+   * @param {RatioState} prevState
+   * @return {RatioProps | null}
    */
-  UNSAFE_componentWillReceiveProps(nextProps, nextContext) {
-    this.setState(this.getComputedDimensions(nextProps));
+  static getDerivedStateFromProps(nextProps, prevState) {
+    const { x, y } = nextProps;
+    const { x: prevX, y: prevY } = prevState;
+
+    if (x === prevX || y === prevY) {
+      return null;
+    }
+
+    return { x, y };
+  }
+
+  /**
+   * @param {RatioProps} prevProps
+   * @param {Readonly<RatioState>} prevState
+   * @return {void}
+   */
+  componentDidUpdate(prevProps, prevState) {
+    const { x, y } = this.props;
+
+    if (prevProps.x !== x || prevProps.y !== y) {
+      this.setState(this.getComputedDimensions(prevProps));
+    }
   }
 
   componentDidMount() {
@@ -72,7 +102,6 @@ export class Ratio extends React.Component {
   };
 
   render() {
-    /** @type {{RatioProps, RatioState}} */
     const {
       props: { children },
       state: { width, height, hasComputed }
@@ -85,3 +114,8 @@ export class Ratio extends React.Component {
     );
   }
 }
+
+Ratio.defaultProps = {
+  x: 3,
+  y: 4
+};
